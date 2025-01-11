@@ -34,6 +34,8 @@ closing_prices.loc[closing_prices["日付"] < split_date, "出来高"] = closing
 closing_prices.set_index("日付", inplace=True)
 closing_prices = closing_prices.rename(columns={"日付": "Date","始値": "Open", "高値": "High", "安値": "Low", "終値": "Close", "出来高": "Volume"})
 
+closing_prices = closing_prices.sort_index()
+
 print(closing_prices.head(100))
 
 # # ローソク足チャートを描画
@@ -53,8 +55,10 @@ y_train = train[1:]
 x_test = test[:-1]
 y_test = test[1:]
 
-print(x_train.head(100))
-print(y_train.head(100))
+print("x_train")
+print(x_train)
+print("x_test")
+print(x_test)
 
 
 esn = PredictionESN(n_input=5,n_reservoir=100,n_output=5)
@@ -64,10 +68,29 @@ y_test_pred = esn.predict(x_test.to_numpy())
 
 
 # 結果をプロット
-plt.figure(figsize=(12, 6))
-plt.plot(y_test.index, y_test["Close"], label="Actual")
-plt.plot(y_test.index, y_test_pred[:, 3], label="Predicted")
-plt.legend()
-plt.title("Stock Price Prediction")
-plt.show()
+# plt.figure(figsize=(12, 6))
+# plt.plot(y_test.index, y_test["Close"], label="Actual")
+# plt.plot(y_test.index, y_test_pred[:, 3], label="Predicted")
+# plt.legend()
+# plt.title("Stock Price Prediction")
+# plt.show()
 
+# predが上がると思った日に上がった日と、下がると思った日に下がった日をカウント
+print(len(y_test_pred))
+print(len(y_test))
+
+
+correct_up=0
+correct_down=0
+for i in range(len(y_test) - 1):
+    if (y_test["Close"].iloc[i] < y_test["Close"].iloc[i + 1]) and (y_test_pred[i, 3] < y_test_pred[i + 1, 3]):
+        correct_up += 1
+    if (y_test["Close"].iloc[i] > y_test["Close"].iloc[i + 1]) and (y_test_pred[i, 3] > y_test_pred[i + 1, 3]):
+        correct_down += 1
+
+
+print(correct_up)
+print(correct_down)
+total_predictions = len(y_test) - 1
+accuracy = (correct_up + correct_down) / total_predictions
+print(f"Accuracy: {accuracy:.2%}")
