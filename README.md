@@ -1,1 +1,2 @@
-pythonとmatplotlibとmplfinanceの学習用
+- Echo State Networkで株価を予測してみた
+- 株価の変動方向を計算してみたところ、精度は50%以下の模様(´・ω・｀)
